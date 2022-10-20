@@ -1,3 +1,4 @@
 techtrends/.venv/**
 *.pyc
 techtrends/database.db
+.vagrant/**
