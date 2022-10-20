@@ -9,13 +9,18 @@ from werkzeug.exceptions import abort
 # Function to get a database connection.
 # This function connects to database with the name `database.db`
 
+
 def set_db_connection_count(connection):
-    connection.execute('UPDATE metrics SET value = value+1 WHERE id = ? LIMIT 1',('db_connection_count',))
+    connection.execute(
+        'UPDATE metrics SET value = value+1 WHERE id = ? LIMIT 1', ('db_connection_count',))
     connection.commit()
 
-def get_db_connection_count(connection: sqlite3.Connection ):
-    db_connection_count = connection.execute('SELECT value FROM metrics WHERE id= ?',('db_connection_count',)).fetchone()
+
+def get_db_connection_count(connection: sqlite3.Connection):
+    db_connection_count = connection.execute(
+        'SELECT value FROM metrics WHERE id= ?', ('db_connection_count',)).fetchone()
     return db_connection_count['value']
+
 
 def get_db_connection():
     connection = sqlite3.connect('database.db')
@@ -33,11 +38,13 @@ def get_post(post_id):
     connection.close()
     return post
 
+
 def get_post_count():
     connection = get_db_connection()
     post_count = connection.execute('SELECT COUNT() FROM posts').fetchone()
     connection.close()
-    return post_count[0]  
+    return post_count[0]
+
 
 # Define the Flask application
 app = Flask(__name__)
@@ -102,6 +109,24 @@ def create():
 
 @app.route('/healthz')
 def healthz():
+    connection = None
+    try:
+        connection = get_db_connection()
+        count = connection.execute(
+            ''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='posts' ''').fetchone()[0]
+        print(count)
+        if count != 1:
+            raise Exception()
+    except:
+        response = app.response_class(
+            response=json.dumps({"result": "ERROR - unhealthy"}),
+            status=500,
+            mimetype='application/json'
+        )
+        return response
+    finally:
+        if connection:
+            connection.close()
     response = app.response_class(
         response=json.dumps({"result": "OK - healthy"}),
         status=200,
@@ -112,11 +137,12 @@ def healthz():
 
 # get_db_connection_count includes the connections to sqlite db for the healthz an metrics endpoints
 
+
 @app.route('/metrics')
 def metrics():
-    metrics={}
+    metrics = {}
     metrics['post_count'] = get_post_count()
-    connection=get_db_connection()
+    connection = get_db_connection()
     metrics['db_connection_count'] = get_db_connection_count(connection)
     connection.close()
     response = app.response_class(

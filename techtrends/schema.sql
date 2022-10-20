@@ -11,4 +11,4 @@ CREATE TABLE posts (
 CREATE TABLE metrics(
     id TEXT PRIMARY KEY NOT NULL,
     value INTEGER NOT NULL DEFAULT 0
-)
+);
