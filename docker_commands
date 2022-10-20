@@ -1,11 +1,32 @@
 ## Docker commands used to build the application 
-# TODO: insert the docker build command
+docker build -t techtrends -f ./Dockerfile .
 
 ## Docker commands used to run the application
-# TODO: insert the docker run command
+docker run -d -p 7111:3111 techtrends
 
 ## Docker commands used to get the application logs
-# TODO: insert the docker logs command
-
+docker logs gifted_villani
 ## Logs from the container running the TechTrends application
-# TODO: paste logs from the Docker container 
+$ docker logs gifted_villani 
+ * Serving Flask app 'app' (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://172.17.0.2:3111/ (Press CTRL+C to quit)
+172.17.0.1 - - [20/Oct/2022 18:44:34] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:44:34] "GET /static/css/main.css HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:44:34] "GET /favicon.ico HTTP/1.1" 404 -
+172.17.0.1 - - [20/Oct/2022 18:45:25] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:45:25] "GET /static/css/main.css HTTP/1.1" 304 -
+[2022-10-20 18:45:28,597] INFO in app: Retrieved post: 2020 CNCF Annual Report
+172.17.0.1 - - [20/Oct/2022 18:45:28] "GET /1 HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:45:28] "GET /static/css/main.css HTTP/1.1" 304 -
+172.17.0.1 - - [20/Oct/2022 18:45:30] "GET /create HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:45:30] "GET /static/css/main.css HTTP/1.1" 304 -
+[2022-10-20 18:45:43,142] INFO in app: New article created: new title
+172.17.0.1 - - [20/Oct/2022 18:45:43] "POST /create HTTP/1.1" 302 -
+172.17.0.1 - - [20/Oct/2022 18:45:43] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [20/Oct/2022 18:45:43] "GET /static/css/main.css HTTP/1.1" 304 -
