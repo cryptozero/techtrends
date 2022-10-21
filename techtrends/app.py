@@ -23,7 +23,11 @@ def get_db_connection_count(connection: sqlite3.Connection):
 
 
 def get_db_connection():
-    connection = sqlite3.connect('database.db')
+    db = 'database.db'
+    try:
+        connection = sqlite3.connect(f'file:{db}?mode=rw', uri=True)
+    except sqlite3.OperationalError:
+        app.logger.error("Error loading DB file.")
     connection.row_factory = sqlite3.Row
     set_db_connection_count(connection)
     return connection
@@ -39,10 +43,8 @@ def get_post(post_id):
     return post
 
 
-def get_post_count():
-    connection = get_db_connection()
+def get_post_count(connection):
     post_count = connection.execute('SELECT COUNT() FROM posts').fetchone()
-    connection.close()
     return post_count[0]
 
 
@@ -68,10 +70,10 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
-        app.logger.info(f'Not found article: returning 404')
+        app.logger.error(f'Not found article: returning 404')
         return render_template('404.html'), 404
     else:
-        app.logger.info(f'Retrieved post: { post["title"] }')
+        app.logger.debug(f'Retrieved post: { post["title"] }')
         return render_template('post.html', post=post)
 
 # Define the About Us page
@@ -79,7 +81,7 @@ def post(post_id):
 
 @app.route('/about')
 def about():
-    app.logger.info(f'Retrieved page: About Us')
+    app.logger.debug(f'Retrieved page: About Us')
     return render_template('about.html')
 
 # Define the post creation functionality
@@ -100,7 +102,7 @@ def create():
             connection.commit()
             connection.close()
 
-            app.logger.info(f'New article created: { title }')
+            app.logger.debug(f'New article created: { title }')
 
             return redirect(url_for('index'))
 
@@ -118,6 +120,7 @@ def healthz():
         if count != 1:
             raise Exception()
     except:
+        app.logger.error('Database not in healthy state')
         response = app.response_class(
             response=json.dumps({"result": "ERROR - unhealthy"}),
             status=500,
@@ -132,7 +135,7 @@ def healthz():
         status=200,
         mimetype='application/json'
     )
-    app.logger.info('Healthz request successfull')
+    app.logger.debug('Healthz request successfull')
     return response
 
 # get_db_connection_count includes the connections to sqlite db for the healthz an metrics endpoints
@@ -141,8 +144,8 @@ def healthz():
 @app.route('/metrics')
 def metrics():
     metrics = {}
-    metrics['post_count'] = get_post_count()
     connection = get_db_connection()
+    metrics['post_count'] = get_post_count(connection)
     metrics['db_connection_count'] = get_db_connection_count(connection)
     connection.close()
     response = app.response_class(
@@ -150,7 +153,7 @@ def metrics():
         status=200,
         mimetype='application/json'
     )
-    app.logger.info('Metrics request successfull')
+    app.logger.debug('Metrics request successfull')
     return response
 
 
